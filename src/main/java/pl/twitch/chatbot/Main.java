@@ -1,26 +1,13 @@
 package pl.twitch.chatbot;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.query.Query;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.*;
-import java.net.Socket;
-import java.net.URL;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-//import java.util.stream.Collectors;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        int refreshTimeInMin = 1;
+        int refreshTimeInMin = 5;
         List<Thread> threads = new ArrayList<>();
         List<ChatThread> chatThreads = new ArrayList<>();
         DatabaseConnect db = new DatabaseConnect();
@@ -58,10 +45,8 @@ public class Main {
             for(ChatThread ct: chatThreads) {
                 ct.closeIrcConnect();
             }
-
+            Thread.sleep(1000);
             System.out.println("THREADS STOPPED, CLOSING CONNECTIONS");
-            Thread.sleep(5000);
-
 
             threads.clear();
             chatThreads.clear();

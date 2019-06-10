@@ -4,12 +4,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class IRCChat {
     private IRCConnect ircConnect;
@@ -30,52 +29,43 @@ public class IRCChat {
         String line = null;
         String[] msg = null;
         int t = 0;
-
-        while ((line = ircConnect.getReader().readLine()) != null) {
-            if (thread.isInterrupted()) {
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                line = ircConnect.getReader().readLine();
+            } catch (SocketException se) {
                 System.out.println("ZAMYKANIE NIEPUSTY");
                 return;
             }
-            if (line.length() == 0) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                if (line.startsWith("PING ")) {
-                    ircConnect.getWriter().write("PONG tmi.twitch.tv\r\n");
-                    ircConnect.getWriter().flush();
-                }
+            if (line.startsWith("PING ")) {
+                ircConnect.getWriter().write("PONG tmi.twitch.tv\r\n");
+                ircConnect.getWriter().flush();
+            }
 //            System.out.println(line);
-                if ((msg = parse(ircConnect.getChannel(), line)) != null) {
+            if ((msg = parse(ircConnect.getChannel(), line)) != null) {
                 line = String.join(": ", msg);
 //                System.out.println(msg[0] + ": " + msg[1]);
 //                System.out.println("[" + streamer + "]" + line);
-                    if (countingMessages) {
+                if (countingMessages) {
 //                    chatters.add(msg[0]);
 //                    t++;
 //                    System.out.println(t);
 //                    if (t % 1 == 0 && t != 0) {
 //                        System.out.println(thread.isInterrupted());
 //                        updateCoins(chatters);
-                        session = db.getSessions().openSession();
-                        Transaction tx = null;
-                        try {
-                            System.out.println("[" + streamer + "] " + line);
-                            tx = session.beginTransaction();
-                            updateCoins(msg[0]);
+                    session = db.getSessions().openSession();
+                    Transaction tx = session.beginTransaction();
+                    try {
+                        System.out.println("[" + streamer + "]\t\t\t\t\t\t" + line);
+//                        tx = session.beginTransaction();
+                        updateCoins(msg[0]);
 //                            session.load(...);
 //                            session.persist(...);
-                            tx.commit(); // Flush happens automatically
-                        }
-                        catch (RuntimeException e) {
-                            tx.rollback();
-                            throw e; // or display error message
-                        }
-                        finally {
-                            session.close();
-                        }
+                        tx.commit(); // Flush happens automatically
+                    } catch (RuntimeException e) {
+                        tx.rollback();
+                        throw e; // or display error message
+                    } finally {
+                        session.close();
                     }
                 }
             }

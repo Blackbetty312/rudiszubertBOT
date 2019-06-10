@@ -6,7 +6,6 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -16,7 +15,7 @@ public class ParseJSON {
 
     public static JSONObject readJsonFromUrl(int streamsCount) throws IOException, JSONException {
 
-        URL apiPath = new URL("https://api.twitch.tv/helix/streams?first=" + streamsCount + "&language=en");
+        URL apiPath = new URL("https://api.twitch.tv/helix/streams?first=" + streamsCount + "&language=pl");
         HttpURLConnection apiPathConnection = (HttpURLConnection) apiPath.openConnection();
         apiPathConnection.setRequestProperty("Client-ID", "v9wklrcgp86fw5bjgs6ki8opoaxkq5");
         InputStream is = apiPathConnection.getInputStream();
